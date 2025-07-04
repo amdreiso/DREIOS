@@ -1,2 +1,2 @@
 
-drawBlocks();
+draw();

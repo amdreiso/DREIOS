@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"fovy",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"fovy",
+  "parent":{
+    "name":"libraries",
+    "path":"folders/Scripts/libraries.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,4 +1,5 @@
 
+randomize();
 
 globalvar Game;
 Game = {
@@ -7,6 +8,8 @@ Game = {
 	version: "1.0",
 	release: "indev",
 };
+
+globalvar Seed; Seed = irandom_range(1000, 10000000);
 
 // data loaders
 block_data();
