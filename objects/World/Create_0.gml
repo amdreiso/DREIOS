@@ -1,27 +1,31 @@
 
-map = ds_grid_create(64, 64);
+map = ds_grid_create(16, 48);
 
 for (var i=0; i<ds_grid_width(map); i++) {
 	for (var j=0; j<ds_grid_height(map); j++) {
 		var slot = new WorldSlot();
-		var count = get_perlin_noise_2D(i, j, 20, true);
+		var count = get_perlin_noise_2D(i, j, 10, true, 8);
 		count = clamp(count, 1, 100);
 		
 		for (var height=0; height<count; height++) {
-			var color = make_color_hsv(irandom(255), 0, 40);
-			if (height == count-1) {
-				color = c_green;
+			var blockID = BLOCK_ID.Stone;
+			
+			if (height == count - 1) {
+				blockID = BLOCK_ID.Grass;
 			}
-			slot.add( new SlotBlock(0, height, color) );
+			
+			slot.set( height, new SlotBlock(blockID, height) );
 		}
 		ds_grid_set(map, i, j, slot);
 	}
 }
 
 surface = surface_create(room_width, room_height);
-skyColor = $181818;
+skyColor = Style.background;
 
-updateWorld = function() {
+displayMode = 0;
+
+update = function() {
 	
 	show_debug_message("Redrawing world");
 	
@@ -36,20 +40,72 @@ updateWorld = function() {
 			var xx = j * sprite_get_width(sBlock_Default) + offsetX;
 			var yy = i * 8;
 			
+			var gridx = j * sprite_get_width(sBlock_Default);
+			var gridy = i * sprite_get_height(sBlock_Default);
+			
 			var stack = ds_grid_get(map, j, i);
 			var color = c_white;
 			
-			for (var block=0; block<array_length(stack.blockList); block++) {
-				var b = stack.blockList[block];
-				color = stack.blockList[block].color;
+			// How many blocks are on the stack slot
+			var blockCount = array_length(stack.blockList);
+			
+			// Draw every block on y axis
+			for (var block=0; block<blockCount; block++) {
+				
+				var b = stack.blockList[block];	// block
+				var blockID = b.blockID;
+				color = b.color;
 				var blockHeight = -b.y * (sprite_get_height(sBlock_Default) / 2);
 				
-				draw_sprite_ext(
-					sBlock_Default, 0, xx + 200, (yy + blockHeight) + 200,
-					1, 1, 0, color, 1
-				);
+				var blockx;
+				var blocky;
+				
+				switch (displayMode) {
+					case 0:
+						blockx = xx;
+						blocky = yy;
+						break;
+						
+					case 1:
+						blockx = gridx;
+						blocky = gridy;
+						break;
+				}
+				
+				var isBlocked = false;
+				
+				
+				// Check if block is blocked
+				//var neighbor = ds_grid_get(map, j, i + 1);		// stack below
+				//if (neighbor != undefined) {
+				//	var neighborBlockCount = array_length(neighbor.blockList);
+					
+				//	// Check if there is a block on the same level as the current stack and the neighboring stack
+				//	for (var nb = 0; nb < neighborBlockCount; nb++) {
+				//		var nby = neighbor.blockList[nb].y;
+				//		if (
+							
+				//			b.y < nby && 
+				//			i < ds_grid_height(map)-2 && 
+				//			j > 1 && 
+				//			j < ds_grid_width(map) &&
+				//			nby != neighborBlockCount-1
+							
+				//			) {
+				//			isBlocked = true;
+				//		}
+						
+				//		if (isBlocked) break;
+				//	}
+				//}
+				
+				if (!isBlocked) {
+					draw_sprite_ext(
+						BLOCK.Get(blockID).sprite, 0, blockx + 200, (blocky + blockHeight) + 200,
+						1, 1, 0, color, 1
+					);
+				}
 			}
-			
 		}
 	}
 	
@@ -57,12 +113,21 @@ updateWorld = function() {
 	
 }
 
-updateWorld();
+update();
 
 draw = function() {
-	
 	draw_surface(surface, 0, 0);
+}
+
+setBlock = function(x, y, z, blockID) {
+	var stack = ds_grid_get(map, x, z);
+	if (stack == undefined) return;
 	
+	stack.set(y, new SlotBlock(blockID, y), true);
+	
+	array_sort(stack.blockList, function(a, b){return a.y - b.y});
+
+	update();
 }
 
 

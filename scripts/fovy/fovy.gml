@@ -414,8 +414,7 @@ function get_perlin_noise_1D(xx, range){
 
 
 // Code from Arend Peter Teaches
-function get_perlin_noise_2D(xx, yy, range, r = false){
-	var chunkSize = 8 * 1;
+function get_perlin_noise_2D(xx, yy, range, r = false, chunkSize = 8){
 	var noise = 0;
 
 	range = range div 2;
